@@ -1,0 +1,81 @@
+##评论列表案列##
+
+**操作localStorage的步骤：**
+
++   我们先将内存当中的数据读取出来，如果是空数据的话在进行JSON。parse的时候就会出错，那么我们就必须考虑到这一点，为他添加一个空的数组。
++   我们将已经绑定的数据添加到已经遍历后的数组当中去，如果是评论的内容就需要我们倒序添加
++   将我们添加后的数据转换为一个字符串，然后进行寸。
+
+**在更新列表的时候我们需要将用子组件来调用父组件的方法，因为更新的方法就在父组件当中。**
+
+
+    <div id="root">
+		<com @updatelist="getlist"></com>
+		<div class="form form-group">
+			<ul class="list-group">
+				<li class="list-group-item" v-for="item in list" :key="item.id">
+					<span class="badge">评论人：{{item.name}}</span>
+					{{item.content}}
+				</li>
+			</ul>
+		</div>
+	</div>
+	<template id="tem">
+		<div class="form-group">
+			<label >
+				评论人：</label>
+				<input type="text" v-model="name" class="form-control">
+			
+			<label >
+				评论内容：</label>
+				<textarea class="form-control" v-model="content" @keyup.enter="postcontent"></textarea>
+			
+			<label>
+				<button class="btn btn-success" @click="postcontent">发表评论</button>
+			</label>
+		</div>
+	</template>
+	<script type="text/javascript">
+		var com={
+			template:"#tem",
+			data(){
+				return{
+				name:'',
+				content:""
+				}
+				
+			},
+			methods:{
+				postcontent(){
+					var comment={id:Date.now(),name:this.name,content:this.content}
+					var list=JSON.parse(localStorage.getItem('cmts') ||'[]')//从localStorage中获取已经有的数据并转换成一个对象
+					list.unshift(comment)
+					localStorage.setItem('cmts',JSON.stringify(list))//重新保存评论
+					this.name=this.content=''
+					this.$emit('updatelist')
+				}
+			}
+		}
+		var vm=new Vue({
+			el:"#root",
+			data:{
+				list:[
+				{id:Date.now(),name:"秦俊",content:"你们可真是秀啊"},
+				// {id:Date.now(),name:"晓静",content:"我爱大佬"},
+				// {id:Date.now(),name:"乔峰",content:"老子最牛逼"}
+				]
+			},
+			created(){
+				this.getlist()
+			},
+			methods:{
+				getlist(){
+					this.list=JSON.parse(localStorage.getItem('cmts') ||'[]')
+				}
+			},
+			components:{
+				com
+			}
+		})
+	
+	</script>
